@@ -28,7 +28,7 @@ GO_PATH = $(shell $(GO) env GOPATH)
 GO_BUILD = $(GO) build
 GO_TEST = $(GO) test
 GO_LINT = $(GO_PATH)/bin/golangci-lint
-GO_BUILD_LDFLAGS = -X github.com/apache/skywalking-eyes/$(PROJECT)/commands.version=$(VERSION)
+GO_BUILD_LDFLAGS = -X github.com/apache/skywalking-eyes/commands.version=$(VERSION)
 
 PLANTUML_VERSION = 1.2021.9
 
@@ -87,23 +87,28 @@ clean:
 verify: clean license lint test verify-docs
 
 release-src: clean
-	-tar -zcvf $(RELEASE_SRC).tgz \
+	-mkdir $(RELEASE_SRC)
+	-tar -zcvf $(RELEASE_SRC)/$(RELEASE_SRC).tgz \
+	--exclude $(RELEASE_SRC).tgz \
 	--exclude bin \
 	--exclude .git \
 	--exclude .idea \
 	--exclude .DS_Store \
 	--exclude .github \
-	--exclude $(RELEASE_SRC).tgz \
+	--exclude $(RELEASE_SRC) \
 	--exclude query-protocol/schema.graphqls \
+	--exclude *.jar \
 	.
+	mv $(RELEASE_SRC)/$(RELEASE_SRC).tgz $(RELEASE_SRC).tgz
+	-rm -rf "$(RELEASE_SRC)"
 
 release-bin: build
 	-mkdir $(RELEASE_BIN)
 	-cp -R bin $(RELEASE_BIN)
 	-cp -R dist/* $(RELEASE_BIN)
 	-cp -R CHANGES.md $(RELEASE_BIN)
-	-cp -R README.adoc $(RELEASE_BIN)
-	-cp -R ../NOTICE $(RELEASE_BIN)
+	-cp -R README.md $(RELEASE_BIN)
+	-cp -R NOTICE $(RELEASE_BIN)
 	-tar -zcvf $(RELEASE_BIN).tgz $(RELEASE_BIN)
 	-rm -rf "$(RELEASE_BIN)"
 
